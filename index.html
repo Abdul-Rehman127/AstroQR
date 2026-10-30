@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,user-scalable=no"><title>QR Game</title></head><body style="margin:0;background:#000">
+<script>
+// Generic ~700-byte player. The entire game is in the URL fragment after '#'.
+// Nothing about the game is stored here; this page runs whatever game it is handed.
+var p=location.hash.slice(1);
+if(!p){document.body.innerHTML='<p style=color:#fff;font-family:monospace;padding:20px>No game in this link.</p>'}
+else{
+  var bin=Uint8Array.from(atob(p),c=>c.charCodeAt(0));
+  new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip')))
+    .text().then(function(html){document.open();document.write(html);document.close()});
+}
+</script>
+</body></html>
