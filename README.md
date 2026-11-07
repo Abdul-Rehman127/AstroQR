@@ -4,9 +4,7 @@ A complete, playable **Asteroids** game that fits entirely inside a **single QR 
 
 ## Play it
 
-![Scan to play](asteroids_qr.png)
-
-Scan the code above with your phone. (See "How scanning works" for why some phone cameras need a browser QR scanner rather than the default camera app.)
+> **Status:** the game source (`src/asteroids.html`) and the generated `asteroids_qr.png` aren't committed to this repo yet — only the packing tool (`pack.py`) and the loader page (`docs/index.html`) are here so far. Follow "Build it yourself" below to generate your own QR code once you have a game file to pack.
 
 ## Controls
 - **Phone:** tap the top of the screen to fire; the bottom row is left / thrust / right.
@@ -27,7 +25,7 @@ A phone's **default camera only auto-opens http(s) links.** Point it at raw HTML
 
 ## Build it yourself
 ```
-pip install segno
+pip install -r requirements.txt
 python3 pack.py src/asteroids.html --base https://YOURNAME.github.io/qr-game/
 ```
 Replace `YOURNAME` with your GitHub username. This regenerates `asteroids_qr.png`.
