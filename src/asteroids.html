@@ -1,0 +1,146 @@
+<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,user-scalable=no"><title>Asteroids</title><style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style></head><body>
+<canvas id=c></canvas>
+<script>
+var cv=document.getElementById('c'),x=cv.getContext('2d');
+function R(){cv.width=innerWidth;cv.height=innerHeight}
+addEventListener('resize',R);R();
+function W(){return cv.width} function H(){return cv.height}
+var ship,bullets,asts,score,over,keys={};
+
+function wrap(o){
+  if(o.x<0)o.x+=W(); if(o.x>W())o.x-=W();
+  if(o.y<0)o.y+=H(); if(o.y>H())o.y-=H();
+}
+function mkAst(px,py,r){
+  var v=[],n=8+Math.floor(Math.random()*4);
+  for(var i=0;i<n;i++){
+    var a=i/n*Math.PI*2,rr=r*(0.7+Math.random()*0.5);
+    v.push([Math.cos(a)*rr,Math.sin(a)*rr]);
+  }
+  return{x:px,y:py,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,r:r,a:Math.random()*7,rot:(Math.random()-.5)*.05,v:v};
+}
+function spawnWave(){
+  for(var k=0;k<5;k++){
+    var ax,ay;
+    do{ax=Math.random()*W();ay=Math.random()*H();}while(Math.hypot(ax-ship.x,ay-ship.y)<150);
+    asts.push(mkAst(ax,ay,40));
+  }
+}
+function reset(){
+  ship={x:W()/2,y:H()/2,a:0,vx:0,vy:0,r:12};
+  bullets=[];asts=[];score=0;over=false;
+  spawnWave();
+}
+function fire(){
+  if(over)return;
+  bullets.push({x:ship.x+Math.cos(ship.a)*ship.r,y:ship.y+Math.sin(ship.a)*ship.r,
+    vx:Math.cos(ship.a)*6+ship.vx,vy:Math.sin(ship.a)*6+ship.vy,life:60});
+}
+addEventListener('keydown',function(e){
+  keys[e.key]=true;
+  if(over&&e.key.toLowerCase()==='r')reset();
+  if(e.key===' ')fire();
+});
+addEventListener('keyup',function(e){keys[e.key]=false});
+
+function zone(t){
+  if(t.clientY<H()*0.5)return'fire';
+  if(t.clientX<W()/3)return'left';
+  if(t.clientX>W()*2/3)return'right';
+  return'thrust';
+}
+var touchMap={};
+addEventListener('touchstart',function(e){
+  e.preventDefault();
+  for(var i=0;i<e.changedTouches.length;i++){
+    var t=e.changedTouches[i],z=zone(t);
+    touchMap[t.identifier]=z;
+    if(z==='fire')fire(); else keys[z]=true;
+  }
+},{passive:false});
+addEventListener('touchend',function(e){
+  e.preventDefault();
+  for(var i=0;i<e.changedTouches.length;i++){
+    var t=e.changedTouches[i],z=touchMap[t.identifier];
+    if(z&&z!=='fire')keys[z]=false;
+    delete touchMap[t.identifier];
+  }
+},{passive:false});
+
+function splitAst(a){
+  if(a.r>15){
+    asts.push(mkAst(a.x,a.y,a.r/2));
+    asts.push(mkAst(a.x,a.y,a.r/2));
+  }
+}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+
+function update(){
+  if(over)return;
+  if(keys.ArrowLeft||keys.a||keys.left)ship.a-=.06;
+  if(keys.ArrowRight||keys.d||keys.right)ship.a+=.06;
+  if(keys.ArrowUp||keys.w||keys.thrust){ship.vx+=Math.cos(ship.a)*.12;ship.vy+=Math.sin(ship.a)*.12;}
+  ship.vx*=.99;ship.vy*=.99;
+  ship.x+=ship.vx;ship.y+=ship.vy;wrap(ship);
+
+  for(var i=bullets.length-1;i>=0;i--){
+    var b=bullets[i];
+    b.x+=b.vx;b.y+=b.vy;b.life--;wrap(b);
+    if(b.life<=0)bullets.splice(i,1);
+  }
+  for(i=asts.length-1;i>=0;i--){
+    var a=asts[i];
+    a.x+=a.vx;a.y+=a.vy;a.a+=a.rot;wrap(a);
+    if(dist(a,ship)<a.r+ship.r)over=true;
+  }
+  for(i=asts.length-1;i>=0;i--){
+    for(var j=bullets.length-1;j>=0;j--){
+      if(dist(asts[i],bullets[j])<asts[i].r){
+        splitAst(asts[i]);
+        asts.splice(i,1);
+        bullets.splice(j,1);
+        score+=10;
+        break;
+      }
+    }
+  }
+  if(asts.length===0)spawnWave();
+}
+
+function drawPoly(o){
+  x.beginPath();
+  for(var i=0;i<o.v.length;i++){
+    var px=o.x+o.v[i][0]*Math.cos(o.a)-o.v[i][1]*Math.sin(o.a);
+    var py=o.y+o.v[i][0]*Math.sin(o.a)+o.v[i][1]*Math.cos(o.a);
+    if(i===0)x.moveTo(px,py); else x.lineTo(px,py);
+  }
+  x.closePath();x.stroke();
+}
+function draw(){
+  x.fillStyle='#000';x.fillRect(0,0,W(),H());
+  x.strokeStyle='#fff';x.fillStyle='#fff';x.lineWidth=2;
+
+  x.save();
+  x.translate(ship.x,ship.y);x.rotate(ship.a);
+  x.beginPath();
+  x.moveTo(ship.r,0);x.lineTo(-ship.r*.7,ship.r*.7);x.lineTo(-ship.r*.4,0);x.lineTo(-ship.r*.7,-ship.r*.7);
+  x.closePath();x.stroke();
+  x.restore();
+
+  bullets.forEach(function(b){x.beginPath();x.arc(b.x,b.y,2,0,7);x.fill();});
+  asts.forEach(drawPoly);
+
+  x.font='20px monospace';x.textAlign='left';
+  x.fillText('Score: '+score,10,25);
+  if(over){
+    x.font='40px monospace';x.textAlign='center';
+    x.fillText('GAME OVER',W()/2,H()/2);
+    x.font='20px monospace';
+    x.fillText('press R to restart',W()/2,H()/2+30);
+    x.textAlign='left';
+  }
+}
+function loop(){update();draw();requestAnimationFrame(loop);}
+reset();loop();
+</script>
+</body></html>
