@@ -4,7 +4,9 @@ A complete, playable **Asteroids** game that fits entirely inside a **single QR 
 
 ## Play it
 
-> **Status:** the game source (`src/asteroids.html`) and the generated `asteroids_qr.png` aren't committed to this repo yet — only the packing tool (`pack.py`) and the loader page (`docs/index.html`) are here so far. Follow "Build it yourself" below to generate your own QR code once you have a game file to pack.
+![Scan to play](asteroids_qr.png)
+
+Scan the code above with your phone, or open it with any QR scanner. The game is `src/asteroids.html`, packed with `pack.py` against this repo's GitHub Pages loader (`docs/index.html`).
 
 ## Controls
 - **Phone:** tap the top of the screen to fire; the bottom row is left / thrust / right.
@@ -18,7 +20,7 @@ asteroids.html ──gzip──►──base64──► put in URL #fragment ─
 
 The QR code holds a normal `https://` link to a fixed, **game-agnostic 700-byte loader page** (`docs/index.html`, hosted free on GitHub Pages). The **entire game** is compressed into the link's `#fragment`. A browser never sends the fragment to the server, so the game still lives entirely inside the QR code; the hosted page is just a dumb player that inflates and runs whatever game it's handed, using the browser's built-in `DecompressionStream`.
 
-A standard QR code holds at most **2,953 bytes**; this build uses **2,116**.
+A standard QR code holds at most **2,953 bytes**; the committed build uses **2,515**.
 
 ## Why an https link instead of raw HTML
 A phone's **default camera only auto-opens http(s) links.** Point it at raw HTML or a `data:` URL and the phone just offers to web-search the text (this is the "it did a Google search" problem). Wrapping the game in a real https link that carries the game in its fragment makes it open on any phone camera, while keeping the game inside the code and nothing game-specific on the server.
