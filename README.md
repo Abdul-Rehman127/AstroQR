@@ -6,7 +6,11 @@ A complete, playable **Asteroids** game that fits entirely inside a **single QR 
 
 ![Scan to play](asteroids_qr.png)
 
-Scan the code above with your phone. (See "How scanning works" for why some phone cameras need a browser QR scanner rather than the default camera app.)
+Scan the code above with your phone. (See ["Why an https link instead of raw HTML"](#why-an-https-link-instead-of-raw-html) for why some phone cameras need a browser QR scanner rather than the default camera app.)
+
+Gameplay once it loads:
+
+![Gameplay](docs/screenshots/gameplay.png)
 
 ## Controls
 - **Phone:** tap the top of the screen to fire; the bottom row is left / thrust / right.
@@ -33,9 +37,9 @@ python3 pack.py src/asteroids.html --base https://YOURNAME.github.io/qr-game/
 Replace `YOURNAME` with your GitHub username. This regenerates `asteroids_qr.png`.
 
 ## Hosting the loader (one time, free)
-1. Push this repo to GitHub.
-2. Settings → Pages → serve from the `docs/` folder.
-3. Your loader lives at `https://YOURNAME.github.io/qr-game/`. Use that as `--base`.
+1. Push this repo to GitHub, with the loader page as `index.html` at the repo root.
+2. Settings → Pages → serve from the root of the `main` branch.
+3. Your loader lives at `https://YOURNAME.github.io/REPO-NAME/`. Use that as `--base`.
 
 The page is uploaded once and never changes; every game is just a different QR with a different fragment.
 
